@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/modelmaestro;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    username: modelmaestro
+    password: modelmaestro
+    driver-class-name: org.h2.Driver
+

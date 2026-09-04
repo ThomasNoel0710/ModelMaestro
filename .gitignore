@@ -1,0 +1,10 @@
+.idea/
+.vscode/
+*.iml
+.env
+frontend/node_modules/
+frontend/dist/
+backend/data/
+
+# Private working notes shared with the local Codex workspace only.
+/docs/PROJECT_PLAN.private.md
