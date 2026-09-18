@@ -2,6 +2,9 @@ package dev.modelmaestro.orchestration;
 
 import java.util.Optional;
 import java.util.UUID;
+import dev.modelmaestro.ai.config.ModelConfig;
+import dev.modelmaestro.ai.config.ModelConfigRepository;
+import dev.modelmaestro.ai.config.ModelConfigNotFoundException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,14 +14,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrchestrationRunService {
 
     private final OrchestrationRunRepository runRepository;
+    private final ModelConfigRepository modelRepository;
 
-    public OrchestrationRunService(OrchestrationRunRepository runRepository) {
+    public OrchestrationRunService(OrchestrationRunRepository runRepository,
+            ModelConfigRepository modelRepository) {
         this.runRepository = runRepository;
+        this.modelRepository = modelRepository;
     }
 
     @Transactional
-    public OrchestrationRun createRun(String objective, long budgetMicros) {
-        OrchestrationRun run = new OrchestrationRun(objective, budgetMicros);
+    public OrchestrationRun createRun(String objective, long budgetMicros, UUID supervisorConfigId) {
+        OrchestrationRun run = new OrchestrationRun(objective, budgetMicros, supervisorConfigId);
+        ModelConfig supervisor = modelRepository.findById(supervisorConfigId)
+                .orElseThrow(() -> new ModelConfigNotFoundException(supervisorConfigId));
+        if (!supervisor.isEnabled()) {
+            throw new SupervisorUnavailableException(supervisorConfigId);
+        }
         return runRepository.save(run);
     }
 
@@ -56,7 +67,7 @@ public class OrchestrationRunService {
     public OrchestrationRun complete(UUID id, OrchestrationResult result) {
         OrchestrationRun run = getRun(id);
         run.complete(
-                result.plan().content(),
+                result.plan().modelResponse().content(),
                 result.work().content(),
                 result.review().content(),
                 result.totalCostMicros());

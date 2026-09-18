@@ -36,8 +36,8 @@ public class OrchestrationRunController {
     public RunResponse createRun(@Valid @RequestBody CreateRunRequest request) {
         OrchestrationRun run = runService.createRun(
                 request.objective(),
-                request.budgetMicros());
-
+                request.budgetMicros(),
+                request.supervisorConfigId());
         return RunResponse.from(run);
     }
 

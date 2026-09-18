@@ -29,6 +29,10 @@ public class OrchestrationRun {
     @Column(name = "budget_micros", nullable = false)
     private long budgetMicros;
 
+    // Nullable only for runs created before supervisor selection was introduced.
+    @Column(name = "supervisor_config_id", updatable = false)
+    private UUID supervisorConfigId;
+
     @Column(name = "spent_micros", nullable = false)
     private long spentMicros;
 
@@ -51,19 +55,22 @@ public class OrchestrationRun {
         // Required by JPA.
     }
 
-    public OrchestrationRun(String objective, long budgetMicros) {
+    public OrchestrationRun(String objective, long budgetMicros, UUID supervisorConfigId) {
         if (objective == null || objective.isBlank()) {
             throw new IllegalArgumentException("Objective must not be blank.");
         }
         if (budgetMicros <= 0) {
             throw new IllegalArgumentException("Budget must be greater than zero.");
         }
-
+        if (supervisorConfigId == null) {
+            throw new IllegalArgumentException("Supervisor configuration must not be null.");
+        }
         Instant now = Instant.now();
         this.id = UUID.randomUUID();
         this.objective = objective.strip();
         this.status = RunStatus.CREATED;
         this.budgetMicros = budgetMicros;
+        this.supervisorConfigId = supervisorConfigId;
         this.spentMicros = 0L;
         this.createdAt = now;
         this.updatedAt = now;
@@ -92,7 +99,6 @@ public class OrchestrationRun {
         if (spentMicros < 0) {
             throw new IllegalArgumentException("Spent amount must not be negative.");
         }
-
         this.planContent = planContent;
         this.workContent = workContent;
         this.finalResult = finalResult;
@@ -142,6 +148,10 @@ public class OrchestrationRun {
 
     public long getBudgetMicros() {
         return budgetMicros;
+    }
+
+    public UUID getSupervisorConfigId() {
+        return supervisorConfigId;
     }
 
     public long getSpentMicros() {

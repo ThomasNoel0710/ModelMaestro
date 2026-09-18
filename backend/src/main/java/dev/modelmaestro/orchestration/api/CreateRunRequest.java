@@ -1,6 +1,8 @@
 package dev.modelmaestro.orchestration.api;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.util.UUID;
 import jakarta.validation.constraints.Positive;
 
 public record CreateRunRequest(
@@ -8,6 +10,8 @@ public record CreateRunRequest(
         String objective,
 
         @Positive(message = "Budget must be greater than zero.")
-        long budgetMicros) {
-}
+        long budgetMicros,
 
+        @NotNull(message = "Supervisor configuration is required.")
+        UUID supervisorConfigId) {
+}
